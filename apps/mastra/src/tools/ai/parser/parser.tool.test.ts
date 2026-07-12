@@ -1,26 +1,66 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+const { generateTextMock } = vi.hoisted(() => ({
+  generateTextMock: vi.fn(),
+}));
+
+vi.mock("ai", () => ({ generateText: generateTextMock }));
+
+vi.mock("../../../config/llm.config.js", () => ({
+  llm: {},
+  CHAT_MODEL: "test-chat-model",
+  EMBEDDING_MODEL: "test-embedding-model",
+}));
 
 import { parseResume } from "./parser.tool.js";
 import { ParsedResumeSchema } from "../../../schemas/resume.schema.js";
 
-describe("parseResume", () => {
-  it("returns a schema-valid ParsedResume", async () => {
-    const parsed = await parseResume("hello resume");
+const sampleResume = {
+  name: "John Doe",
+  email: "john@example.com",
+  skills: ["Python", "SQL"],
+  experience: [{ company: "Acme", role: "Engineer", duration: "2y" }],
+  education: [{ degree: "BS", institution: "MIT" }],
+  certifications: [],
+  projects: [],
+  languages: [],
+};
 
+describe("parseResume", () => {
+  beforeEach(() => {
+    generateTextMock.mockReset();
+  });
+
+  it("returns a schema-valid resume parsed from the model JSON", async () => {
+    generateTextMock.mockResolvedValue({ text: JSON.stringify(sampleResume) });
+
+    const parsed = await parseResume("some resume text");
+
+    expect(parsed).toEqual(sampleResume);
     expect(ParsedResumeSchema.safeParse(parsed).success).toBe(true);
   });
 
-  it("preserves the raw content in the summary field", async () => {
-    const parsed = await parseResume("some resume content");
+  it("extracts JSON even when wrapped in markdown fences and prose", async () => {
+    generateTextMock.mockResolvedValue({
+      text: `Here is the result:\n\`\`\`json\n${JSON.stringify(sampleResume)}\n\`\`\``,
+    });
 
-    expect(parsed.summary).toBe("some resume content");
+    const parsed = await parseResume("resume body");
+
+    expect(parsed.name).toBe("John Doe");
   });
 
-  it("returns empty structured collections for the stub implementation", async () => {
-    const parsed = await parseResume("anything");
+  it("includes the resume content in the prompt", async () => {
+    generateTextMock.mockResolvedValue({ text: JSON.stringify(sampleResume) });
 
-    expect(parsed.skills).toEqual([]);
-    expect(parsed.experience).toEqual([]);
-    expect(parsed.education).toEqual([]);
+    await parseResume("resume body");
+
+    expect(generateTextMock.mock.calls[0][0].prompt).toContain("resume body");
+  });
+
+  it("throws when the model response has no JSON object", async () => {
+    generateTextMock.mockResolvedValue({ text: "no json here" });
+
+    await expect(parseResume("x")).rejects.toThrow();
   });
 });
