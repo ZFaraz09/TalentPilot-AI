@@ -1,23 +1,19 @@
 import { createStep } from "@mastra/core/workflows";
-import { z } from "zod";
 
 import { generateEmbedding } from "../../../tools/ai/embedding/index.js";
+import {
+  EmbeddedResumeStepSchema,
+  ParsedResumeStepSchema,
+} from "../schema.js";
 
 export const embedResumeStep = createStep({
   id: "embed-resume",
 
   description: "Generate semantic embedding from the parsed resume.",
 
-  inputSchema: z.object({
-    candidateId: z.string(),
-    parsedResume: z.any(),
-  }),
+  inputSchema: ParsedResumeStepSchema,
 
-  outputSchema: z.object({
-    candidateId: z.string(),
-    parsedResume: z.any(),
-    embedding: z.array(z.number()),
-  }),
+  outputSchema: EmbeddedResumeStepSchema,
 
   execute: async ({ inputData }) => {
     const resumeText = JSON.stringify(inputData.parsedResume);

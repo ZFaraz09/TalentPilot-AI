@@ -1,27 +1,20 @@
 import { createStep } from "@mastra/core/workflows";
-import { z } from "zod";
 
 import { saveCandidate } from "../../../tools/database/postgres/index.js";
 import { toCandidateRecord } from "../../../tools/database/postgres/mapper.js";
-import { ParsedResumeSchema } from "../../../schemas/resume.schema.js";
+import {
+  ResumeUploadOutputSchema,
+  StoredVectorStepSchema,
+} from "../schema.js";
 
 export const saveProfileStep = createStep({
   id: "save-profile",
 
   description: "Save parsed candidate profile into PostgreSQL.",
 
-  inputSchema: z.object({
-    candidateId: z.string(),
-    parsedResume: ParsedResumeSchema,
-    embedding: z.array(z.number()),
-    vectorStored: z.boolean(),
-  }),
+  inputSchema: StoredVectorStepSchema,
 
-  outputSchema: z.object({
-    success: z.boolean(),
-    candidateId: z.string(),
-    message: z.string(),
-  }),
+  outputSchema: ResumeUploadOutputSchema,
 
   execute: async ({ inputData }) => {
     const candidate = toCandidateRecord(
