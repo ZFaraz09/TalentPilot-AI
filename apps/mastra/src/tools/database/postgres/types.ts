@@ -1,3 +1,5 @@
+import type { OperationResult } from "../../../shared/operation-result.js";
+
 /**
  * Candidate record stored in PostgreSQL.
  */
@@ -13,10 +15,7 @@ export interface CandidateRecord {
 /**
  * Save operation response.
  */
-export interface SaveCandidateResponse {
-  success: boolean;
-  message: string;
-}
+export type SaveCandidateResponse = OperationResult;
 
 /**
  * Candidate lookup request.

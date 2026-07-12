@@ -35,7 +35,7 @@ describe("saveCandidate", () => {
 
     await saveCandidate(candidate);
 
-    expect(logSpy).toHaveBeenCalledWith("Saving candidate:", candidate);
+    expect(logSpy).toHaveBeenCalledWith("Saving candidate:", candidate.id);
   });
 });
 
@@ -60,6 +60,6 @@ describe("findCandidate", () => {
 
     await findCandidate(request);
 
-    expect(logSpy).toHaveBeenCalledWith("Finding candidate:", request);
+    expect(logSpy).toHaveBeenCalledWith("Finding candidate:", request.id);
   });
 });

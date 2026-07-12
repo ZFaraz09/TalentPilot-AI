@@ -1,3 +1,4 @@
+import { createSuccessResult } from "../../../shared/operation-result.js";
 import {
   CandidateRecord,
   SaveCandidateResponse,
@@ -10,12 +11,9 @@ import {
 export async function saveCandidate(
   candidate: CandidateRecord
 ): Promise<SaveCandidateResponse> {
-  console.log("Saving candidate:", candidate);
+  console.log("Saving candidate:", candidate.id);
 
-  return {
-    success: true,
-    message: "Candidate saved successfully.",
-  };
+  return createSuccessResult("Candidate saved successfully.");
 }
 
 /**
@@ -24,7 +22,7 @@ export async function saveCandidate(
 export async function findCandidate(
   request: CandidateLookupRequest
 ): Promise<CandidateRecord | null> {
-  console.log("Finding candidate:", request);
+  console.log("Finding candidate:", request.id);
 
   return null;
 }

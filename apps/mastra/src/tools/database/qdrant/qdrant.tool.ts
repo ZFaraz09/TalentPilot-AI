@@ -1,3 +1,4 @@
+import { createSuccessResult } from "../../../shared/operation-result.js";
 import {
   StoreVectorRequest,
   StoreVectorResponse,
@@ -8,18 +9,15 @@ import {
 export async function storeVector(
   request: StoreVectorRequest
 ): Promise<StoreVectorResponse> {
-  console.log("Store Vector:", request);
+  console.log("Store Vector:", request.id);
 
-  return {
-    success: true,
-    message: "Vector stored successfully.",
-  };
+  return createSuccessResult("Vector stored successfully.");
 }
 
 export async function searchVector(
   request: SearchVectorRequest
 ): Promise<SearchResult[]> {
-  console.log("Search Vector:", request);
+  console.log("Search Vector: limit =", request.limit ?? "default");
 
   return [];
 }

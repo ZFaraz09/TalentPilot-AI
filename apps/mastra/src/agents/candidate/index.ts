@@ -1,12 +1,10 @@
-import { Agent } from "@mastra/core/agent";
-import { llm } from "../../config/llm.config.js";
+import { createTalentPilotAgent } from "../create-agent.js";
 import { candidateInstructions } from "./instructions.js";
 import { candidateTools } from "./tools.js";
 
-export const candidateAgent = new Agent({
+export const candidateAgent = createTalentPilotAgent({
   id: "candidate-agent",
   name: "Candidate Agent",
   instructions: candidateInstructions,
-  model: llm,
   tools: candidateTools,
 });

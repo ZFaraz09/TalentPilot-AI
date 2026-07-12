@@ -29,7 +29,7 @@ describe("storeVector", () => {
 
     await storeVector(request);
 
-    expect(logSpy).toHaveBeenCalledWith("Store Vector:", request);
+    expect(logSpy).toHaveBeenCalledWith("Store Vector:", request.id);
   });
 });
 
@@ -54,6 +54,6 @@ describe("searchVector", () => {
 
     await searchVector(request);
 
-    expect(logSpy).toHaveBeenCalledWith("Search Vector:", request);
+    expect(logSpy).toHaveBeenCalledWith("Search Vector: limit =", 5);
   });
 });

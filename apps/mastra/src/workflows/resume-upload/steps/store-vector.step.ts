@@ -1,26 +1,19 @@
 import { createStep } from "@mastra/core/workflows";
-import { z } from "zod";
 
 import { storeVector } from "../../../tools/database/qdrant/index.js";
-import { ParsedResumeSchema } from "../../../schemas/resume.schema.js";
+import {
+  PersistableResumeStepSchema,
+  StoredVectorStepSchema,
+} from "../schema.js";
 
 export const storeVectorStep = createStep({
   id: "store-vector",
 
   description: "Store candidate embedding in Qdrant.",
 
-  inputSchema: z.object({
-    candidateId: z.string(),
-    parsedResume: ParsedResumeSchema,
-    embedding: z.array(z.number()),
-  }),
+  inputSchema: PersistableResumeStepSchema,
 
-  outputSchema: z.object({
-    candidateId: z.string(),
-    parsedResume: ParsedResumeSchema,
-    embedding: z.array(z.number()),
-    vectorStored: z.boolean(),
-  }),
+  outputSchema: StoredVectorStepSchema,
 
   execute: async ({ inputData }) => {
     await storeVector({
