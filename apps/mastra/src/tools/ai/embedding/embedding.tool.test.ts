@@ -1,21 +1,40 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+const { embedMock } = vi.hoisted(() => ({ embedMock: vi.fn() }));
+
+vi.mock("ai", () => ({ embed: embedMock }));
+
+vi.mock("@ai-sdk/google", () => {
+  const google = Object.assign(vi.fn(() => "chat-model"), {
+    textEmbeddingModel: vi.fn(() => "embed-model"),
+  });
+  return { google };
+});
 
 import { generateEmbedding } from "./embedding.tool.js";
 
 describe("generateEmbedding", () => {
-  it("returns the placeholder embedding response", async () => {
-    const response = await generateEmbedding({ text: "some resume text" });
-
-    expect(response).toEqual({
-      embedding: [],
-      dimensions: 0,
-      model: "pending",
-    });
+  beforeEach(() => {
+    embedMock.mockReset();
   });
 
-  it("returns an embedding whose dimensions match its length", async () => {
-    const response = await generateEmbedding({ text: "another text" });
+  it("returns the embedding with its dimensions and model", async () => {
+    embedMock.mockResolvedValue({ embedding: [0.1, 0.2, 0.3] });
 
-    expect(response.embedding).toHaveLength(response.dimensions);
+    const result = await generateEmbedding({ text: "hello" });
+
+    expect(result.embedding).toEqual([0.1, 0.2, 0.3]);
+    expect(result.dimensions).toBe(3);
+    expect(result.model).toBe("gemini-embedding-001");
+  });
+
+  it("passes the request text to the embedding provider", async () => {
+    embedMock.mockResolvedValue({ embedding: [] });
+
+    await generateEmbedding({ text: "resume text" });
+
+    expect(embedMock).toHaveBeenCalledWith(
+      expect.objectContaining({ value: "resume text" })
+    );
   });
 });
