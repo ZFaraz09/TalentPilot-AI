@@ -8,7 +8,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
  * an embeddings endpoint. All model ids and endpoints are env-overridable.
  */
 export const CHAT_MODEL =
-  process.env.FEATHERLESS_CHAT_MODEL ?? "Qwen/Qwen2.5-72B-Instruct";
+  process.env.FEATHERLESS_CHAT_MODEL ?? "deepseek-ai/DeepSeek-V3.1";
 
 export const EMBEDDING_MODEL =
   process.env.GEMINI_EMBEDDING_MODEL ?? "gemini-embedding-001";

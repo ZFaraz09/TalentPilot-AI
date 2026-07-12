@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { generateObjectMock } = vi.hoisted(() => ({
-  generateObjectMock: vi.fn(),
+const { generateTextMock } = vi.hoisted(() => ({
+  generateTextMock: vi.fn(),
 }));
 
-vi.mock("ai", () => ({ generateObject: generateObjectMock }));
+vi.mock("ai", () => ({ generateText: generateTextMock }));
 
 vi.mock("../../../config/llm.config.js", () => ({
   llm: {},
@@ -28,11 +28,11 @@ const sampleResume = {
 
 describe("parseResume", () => {
   beforeEach(() => {
-    generateObjectMock.mockReset();
+    generateTextMock.mockReset();
   });
 
-  it("returns the structured resume produced by the model", async () => {
-    generateObjectMock.mockResolvedValue({ object: sampleResume });
+  it("returns a schema-valid resume parsed from the model JSON", async () => {
+    generateTextMock.mockResolvedValue({ text: JSON.stringify(sampleResume) });
 
     const parsed = await parseResume("some resume text");
 
@@ -40,13 +40,27 @@ describe("parseResume", () => {
     expect(ParsedResumeSchema.safeParse(parsed).success).toBe(true);
   });
 
-  it("asks the model to extract against the ParsedResume schema", async () => {
-    generateObjectMock.mockResolvedValue({ object: sampleResume });
+  it("extracts JSON even when wrapped in markdown fences and prose", async () => {
+    generateTextMock.mockResolvedValue({
+      text: `Here is the result:\n\`\`\`json\n${JSON.stringify(sampleResume)}\n\`\`\``,
+    });
+
+    const parsed = await parseResume("resume body");
+
+    expect(parsed.name).toBe("John Doe");
+  });
+
+  it("includes the resume content in the prompt", async () => {
+    generateTextMock.mockResolvedValue({ text: JSON.stringify(sampleResume) });
 
     await parseResume("resume body");
 
-    const call = generateObjectMock.mock.calls[0][0];
-    expect(call.schema).toBe(ParsedResumeSchema);
-    expect(call.prompt).toContain("resume body");
+    expect(generateTextMock.mock.calls[0][0].prompt).toContain("resume body");
+  });
+
+  it("throws when the model response has no JSON object", async () => {
+    generateTextMock.mockResolvedValue({ text: "no json here" });
+
+    await expect(parseResume("x")).rejects.toThrow();
   });
 });
