@@ -1,3 +1,5 @@
+import type { OperationResult } from "../../../shared/operation-result.js";
+
 /**
  * Request to store a vector.
  */
@@ -10,10 +12,7 @@ export interface StoreVectorRequest {
 /**
  * Result after storing a vector.
  */
-export interface StoreVectorResponse {
-  success: boolean;
-  message: string;
-}
+export type StoreVectorResponse = OperationResult;
 
 /**
  * Search request.

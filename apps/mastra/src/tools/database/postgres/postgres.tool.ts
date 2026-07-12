@@ -1,3 +1,4 @@
+import { createSuccessResult } from "../../../shared/operation-result.js";
 import {
   CandidateRecord,
   SaveCandidateResponse,
@@ -12,10 +13,7 @@ export async function saveCandidate(
 ): Promise<SaveCandidateResponse> {
   console.log("Saving candidate:", candidate.id);
 
-  return {
-    success: true,
-    message: "Candidate saved successfully.",
-  };
+  return createSuccessResult("Candidate saved successfully.");
 }
 
 /**
