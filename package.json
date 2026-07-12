@@ -1,0 +1,28 @@
+{
+  "name": "talentpilot-ai",
+  "version": "1.0.0",
+  "description": "Production AI Agent Platform using Mastra",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch apps/api/src/server.ts",
+    "build": "tsc",
+    "start": "node dist/apps/api/src/server.js"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.10",
+    "@mastra/core": "^1.50.1",
+    "ai": "^6.0.221",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.2"
+  }
+}
