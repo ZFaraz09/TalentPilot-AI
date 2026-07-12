@@ -8,7 +8,7 @@ import {
 export async function storeVector(
   request: StoreVectorRequest
 ): Promise<StoreVectorResponse> {
-  console.log("Store Vector:", request);
+  console.log("Store Vector:", request.id);
 
   return {
     success: true,
@@ -19,7 +19,7 @@ export async function storeVector(
 export async function searchVector(
   request: SearchVectorRequest
 ): Promise<SearchResult[]> {
-  console.log("Search Vector:", request);
+  console.log("Search Vector: limit =", request.limit ?? "default");
 
   return [];
 }
