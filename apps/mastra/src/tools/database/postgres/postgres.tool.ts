@@ -10,7 +10,7 @@ import {
 export async function saveCandidate(
   candidate: CandidateRecord
 ): Promise<SaveCandidateResponse> {
-  console.log("Saving candidate:", candidate);
+  console.log("Saving candidate:", candidate.id);
 
   return {
     success: true,
@@ -24,7 +24,7 @@ export async function saveCandidate(
 export async function findCandidate(
   request: CandidateLookupRequest
 ): Promise<CandidateRecord | null> {
-  console.log("Finding candidate:", request);
+  console.log("Finding candidate:", request.id);
 
   return null;
 }
