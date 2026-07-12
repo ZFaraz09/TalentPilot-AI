@@ -1,33 +1,32 @@
 import { Router } from "express";
 
 import { mastra } from "../../../mastra/src/index.js";
+import { ResumeUploadInputSchema } from "../workflows/resume-upload/schema.js";
 
 const router = Router();
 
 router.post("/upload", async (req, res) => {
-  try {
-    const { candidateId, resumeContent } = req.body;
+  const inputData = ResumeUploadInputSchema.parse(req.body);
 
-    const workflow = mastra.getWorkflow("resumeUpload");
+  const workflow = mastra.getWorkflow("resumeUpload");
 
-    const run = await workflow.createRun();
+  const run = await workflow.createRun();
 
-    const result = await run.start({
-      inputData: {
-        candidateId,
-        resumeContent,
-      },
-    });
+  const result = await run.start({ inputData });
 
-    res.status(200).json(result);
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Workflow execution failed.",
+  if (result.status === "failed") {
+    throw new Error("Resume upload workflow failed.", {
+      cause: result.error,
     });
   }
+
+  if (result.status !== "success") {
+    throw new Error(
+      `Resume upload workflow did not complete successfully: ${result.status}.`
+    );
+  }
+
+  res.status(200).json(result);
 });
 
 export default router;

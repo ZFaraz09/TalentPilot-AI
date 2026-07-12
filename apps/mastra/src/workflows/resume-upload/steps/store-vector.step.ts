@@ -23,11 +23,15 @@ export const storeVectorStep = createStep({
   }),
 
   execute: async ({ inputData }) => {
-    await storeVector({
+    const result = await storeVector({
       id: inputData.candidateId,
       embedding: inputData.embedding,
       payload: inputData.parsedResume,
     });
+
+    if (!result.success) {
+      throw new Error(`Failed to store candidate vector: ${result.message}`);
+    }
 
     return {
       candidateId: inputData.candidateId,

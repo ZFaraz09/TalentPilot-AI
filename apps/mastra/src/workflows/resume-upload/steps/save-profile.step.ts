@@ -31,8 +31,12 @@ export const saveProfileStep = createStep({
 
     const result = await saveCandidate(candidate);
 
+    if (!result.success) {
+      throw new Error(`Failed to save candidate profile: ${result.message}`);
+    }
+
     return {
-      success: result.success,
+      success: true,
       candidateId: inputData.candidateId,
       message: result.message,
     };
