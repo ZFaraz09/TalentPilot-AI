@@ -18,18 +18,14 @@ export const ResumeUploadOutputSchema = z.object({
 
 export const ParsedResumeStepSchema = z.object({
   candidateId: CandidateIdSchema,
-  parsedResume: z.any(),
+  parsedResume: ParsedResumeSchema,
 });
 
 export const EmbeddedResumeStepSchema = ParsedResumeStepSchema.extend({
   embedding: EmbeddingSchema,
 });
 
-export const PersistableResumeStepSchema = z.object({
-  candidateId: CandidateIdSchema,
-  parsedResume: ParsedResumeSchema,
-  embedding: EmbeddingSchema,
-});
+export const PersistableResumeStepSchema = EmbeddedResumeStepSchema;
 
 export const StoredVectorStepSchema = PersistableResumeStepSchema.extend({
   vectorStored: z.boolean(),
