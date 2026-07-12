@@ -1,51 +1,61 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+const { queryMock } = vi.hoisted(() => ({ queryMock: vi.fn() }));
+
+vi.mock("pg", () => ({ Pool: vi.fn(() => ({ query: queryMock })) }));
+
+vi.mock("./config.js", () => ({
+  postgresConfig: { connectionString: "postgres://test", table: "candidates" },
+}));
 
 import { saveCandidate, findCandidate } from "./postgres.tool.js";
-import type { CandidateRecord } from "./types.js";
 
-const candidate: CandidateRecord = {
+const candidate = {
   id: "cand-1",
-  fullName: "Ada Lovelace",
-  email: "ada@example.com",
-  skills: ["math"],
-  experience: 2,
-  education: "BSc - University of London",
+  fullName: "Jane Doe",
+  email: "jane@example.com",
+  skills: ["TypeScript"],
+  experience: 3,
+  education: "BS - MIT",
 };
 
 describe("saveCandidate", () => {
   beforeEach(() => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
+    queryMock.mockReset();
+    queryMock.mockResolvedValue({ rows: [] });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  it("returns a success result", async () => {
+    const result = await saveCandidate(candidate);
 
-  it("returns a successful save response", async () => {
-    const response = await saveCandidate(candidate);
-
-    expect(response).toEqual({
+    expect(result).toEqual({
       success: true,
       message: "Candidate saved successfully.",
     });
   });
 
-  it("logs the candidate being saved", async () => {
-    const logSpy = vi.spyOn(console, "log");
-
+  it("upserts the candidate with mapped parameters", async () => {
     await saveCandidate(candidate);
 
-    expect(logSpy).toHaveBeenCalledWith("Saving candidate:", candidate.id);
+    const insertCall = queryMock.mock.calls.find((call) =>
+      String(call[0]).includes("INSERT INTO")
+    );
+
+    expect(insertCall?.[1]).toEqual([
+      "cand-1",
+      "Jane Doe",
+      "jane@example.com",
+      ["TypeScript"],
+      3,
+      "BS - MIT",
+    ]);
   });
 });
 
 describe("findCandidate", () => {
   beforeEach(() => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
+    queryMock.mockReset();
+    queryMock.mockResolvedValue({ rows: [] });
   });
 
   it("returns null when no candidate is found", async () => {
@@ -54,12 +64,33 @@ describe("findCandidate", () => {
     expect(result).toBeNull();
   });
 
-  it("logs the lookup request", async () => {
-    const logSpy = vi.spyOn(console, "log");
-    const request = { id: "cand-1" };
+  it("maps a found row to a CandidateRecord", async () => {
+    queryMock.mockImplementation(async (sql: string) =>
+      String(sql).includes("SELECT")
+        ? {
+            rows: [
+              {
+                id: "cand-1",
+                full_name: "Jane Doe",
+                email: "jane@example.com",
+                skills: ["TypeScript"],
+                experience: 3,
+                education: null,
+              },
+            ],
+          }
+        : { rows: [] }
+    );
 
-    await findCandidate(request);
+    const result = await findCandidate({ id: "cand-1" });
 
-    expect(logSpy).toHaveBeenCalledWith("Finding candidate:", request.id);
+    expect(result).toEqual({
+      id: "cand-1",
+      fullName: "Jane Doe",
+      email: "jane@example.com",
+      skills: ["TypeScript"],
+      experience: 3,
+      education: undefined,
+    });
   });
 });

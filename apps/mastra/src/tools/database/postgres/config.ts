@@ -1,3 +1,4 @@
 export const postgresConfig = {
-  database: "talentpilot",
+  connectionString: process.env.DATABASE_URL,
+  table: process.env.POSTGRES_TABLE ?? "candidates",
 };
